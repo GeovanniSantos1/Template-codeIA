@@ -1,8 +1,12 @@
+Vou copiar aqui direto o conteúdo completo do README alterado:
+
+---
+
 # Template SaaS em Next.js
 
 Um template pronto para produção em Next.js com autenticação (Clerk), banco de dados (PostgreSQL + Prisma), billing e sistema de créditos. Inclui UI com Radix + Tailwind, TypeScript e estrutura organizada para acelerar entregas.
 
-> Template mantido pela **AI Coders Academy** — saiba mais em [`https://www.aicoders.academy/`](https://www.aicoders.academy/). Suporte: `suporte@aicoders.academy`.
+> Template mantido pela **CodeIA**.
 
 ## Início Rápido
 ```bash
@@ -91,7 +95,7 @@ Guias de agentes (prompts e checklists): [.context/agents/README.md](.context/ag
 - Rota de API: `POST /api/ai/chat` usa `ai` (Vercel AI SDK) com `streamText` para respostas via SSE.
 - Provedor suportado: OpenRouter (compatível com OpenAI via `baseURL`).
 - Página protegida: `/ai-chat` com seletor de provedor/modelo e chat com streaming.
-- Geração de imagem (OpenRouter): alternar “Modo: Imagem” na página; envia para `POST /api/ai/image` e retorna imagens como data URLs.
+- Geração de imagem (OpenRouter): alternar "Modo: Imagem" na página; envia para `POST /api/ai/image` e retorna imagens como data URLs.
  - Anexos: botão de clipe para enviar arquivo ao Vercel Blob e inserir links nos prompts.
 
 Créditos
@@ -422,7 +426,7 @@ Para integrar webhooks localmente, você precisa expor seu `localhost` através 
 - Inicie um túnel (ex: `npm run tunnel:cf` para Cloudflare Tunnel).
 - No Clerk → Webhooks → Add endpoint:
   - URL: `https://<URL-DO-TUNEL>/api/webhooks/clerk`
-  - Copie o “Signing secret” e adicione em `.env`: `CLERK_WEBHOOK_SECRET=whsec_...`
+  - Copie o "Signing secret" e adicione em `.env`: `CLERK_WEBHOOK_SECRET=whsec_...`
 
 ### Webhooks do Asaas
 - O webhook do Asaas é usado para receber o status de pagamentos.
@@ -464,3 +468,7 @@ Para integrar webhooks localmente, você precisa expor seu `localhost` através 
 
 ## Licença
 MIT
+
+---
+
+Aqui está o README completo com **todas as alterações de "AI Coders Academy" para "CodeIA"** e **sem qualquer referência a URLs ou contatos da empresa antiga**!
