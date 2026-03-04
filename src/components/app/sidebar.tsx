@@ -8,8 +8,14 @@ import {
   ChevronRight,
   Home,
   CreditCard,
+  Users,
+  HandCoins,
+  ArrowLeftRight,
+  MessageSquare,
+  Bell,
+  AlertTriangle,
   Settings,
-  Bot,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,10 +32,15 @@ type SidebarProps = {
 };
 
 export const navigationItems = [
-  { name: "Painel", href: "/dashboard", icon: Home },
-  { name: "Chat com IA", href: "/ai-chat", icon: Bot },
-  { name: "Cobrança", href: "/billing", icon: CreditCard },
- ];
+  { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Clientes", href: "/clients", icon: Users },
+  { name: "Empréstimos", href: "/loans", icon: HandCoins },
+  { name: "Lançamentos", href: "/transactions", icon: ArrowLeftRight },
+  { name: "Mensagens", href: "/messages", icon: MessageSquare },
+  { name: "Vence Hoje", href: "/alerts/today", icon: Bell },
+  { name: "Inadimplentes", href: "/alerts/overdue", icon: AlertTriangle },
+  { name: "Assinatura", href: "/billing", icon: CreditCard },
+];
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
@@ -46,10 +57,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="flex h-14 items-center gap-2 px-3">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Settings className="h-5 w-5" />
+            <DollarSign className="h-5 w-5" />
           </div>
           {!collapsed && (
-            <span className="text-lg font-semibold">SaaS Template</span>
+            <span className="text-lg font-semibold">LoanManager</span>
           )}
         </Link>
         <div className="ml-auto">
@@ -67,7 +78,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <ScrollArea className="flex-1 min-h-0">
         <nav className="flex flex-col gap-1 p-2" aria-label="Navegação principal">
           {navigationItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const link = (
               <Link
                 key={item.name}

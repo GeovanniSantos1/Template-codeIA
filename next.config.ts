@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     '*.replit.dev',
     '*.repl.co',
     '*.picard.replit.dev',
+    '*.janeway.replit.dev',
+    '*.kirk.replit.dev',
+    '127.0.0.1',
   ],
   images: {
     remotePatterns: [

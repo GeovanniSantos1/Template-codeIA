@@ -1,0 +1,859 @@
+💸 LoanManager
+
+App de Gestão de Empréstimos
+
+Product Requirements Document (PRD)
+
+Versão 1.0 • Junho 2025
+
+  ----------------- ----------------- ----------------- -----------------
+  Produto           Versão            Status            Audiência
+
+  LoanManager       1.0 MVP           Em Planejamento   Dev +
+                                                        Stakeholders
+  ----------------- ----------------- ----------------- -----------------
+
+  1. Visão Geral do Produto
+
+1.1 Problema
+
++-----------------------------------------------------------------------+
+| Contexto do Problema                                                  |
+|                                                                       |
+| O usuário gerencia empréstimos pessoais manualmente através de uma    |
+| planilha Excel (.xlsb) com múltiplas abas, VBA, tabelas dinâmicas e   |
+| lógicas complexas. Esse processo é frágil: a planilha pode corromper, |
+| não é acessível via mobile, não possui controle de acesso, e          |
+| dificulta o monitoramento em tempo real de inadimplência, fluxo de    |
+| caixa e vencimentos. A gestão de até 30 parcelas por cliente, com     |
+| cálculo de juros, multas, WhatsApp e controle de pagamentos, está     |
+| sendo feita de forma manual e propensa a erros.                       |
++-----------------------------------------------------------------------+
+
+1.2 Solução
+
+Desenvolver um aplicativo web SaaS (Software as a Service) de gestão de
+empréstimos que digitalize e automatize todos os processos atualmente
+realizados na planilha, incluindo:
+
+-   Cadastro completo de clientes com dados financeiros e bancários
+
+-   Registro e controle de empréstimos com até 30 parcelas
+
+-   Cálculo automático de juros, multas por atraso e dívida total
+
+-   Dashboard com métricas de fluxo de caixa e inadimplência
+
+-   Alertas de vencimentos e integração com WhatsApp
+
+-   Lançamentos de entradas e saídas (fluxo de caixa)
+
+-   Relatórios e exportação de dados
+
+1.3 Modelo de Negócio
+
+  ---------------- ------------------------------------------------------
+  Item             Detalhe
+
+  Modelo           SaaS por assinatura mensal
+
+  Preço MVP        R$ 29,90/mês por usuário
+
+  Pagamento        Integrado com Asaas (gateway de pagamento)
+
+  Autenticação     Clerk (login com e-mail/Google)
+
+  Acesso           Somente usuários com assinatura ativa
+  ---------------- ------------------------------------------------------
+
+  2. Usuários e Personas
+
+2.1 Persona Principal
+
+  --------------------- -------------------------------------------------
+  Atributo              Descrição
+
+  Nome                  Credor Informal / Agiotas PF
+
+  Perfil                Pessoa física que empresta dinheiro para amigos,
+                        familiares ou conhecidos com cobrança de juros
+
+  Dor principal         Perder o controle de quem deve, quanto deve e
+                        quando vence
+
+  Técnico               Usa planilha Excel atualmente; tem smartphone;
+                        não é dev
+
+  Objetivo              Visualizar tudo em um único lugar, receber
+                        alertas e cobrar clientes facilmente
+  --------------------- -------------------------------------------------
+
+2.2 Papéis no Sistema
+
+-   Admin (dono da conta) — gerencia tudo, controla assinatura
+
+-   Usuário padrão — acessa o sistema após assinar o plano
+
+-   Super Admin (interno) — painel Anthropic para suporte
+
+  3. Funcionalidades Detalhadas
+
++-----------------------------------------------------------------------+
+| Origem das Funcionalidades                                            |
+|                                                                       |
+| Todas as funcionalidades abaixo foram mapeadas diretamente a partir   |
+| das abas e campos existentes na planilha: Inicio, Lançamentos, Fluxo, |
+| Fórmulas, Relatórios, Cadastros, Mensagens — mais o que foi           |
+| identificado nos campos das tabelas e strings compartilhadas.         |
++-----------------------------------------------------------------------+
+
+3.1 Módulo: Cadastro de Clientes
+
+Equivalente à aba Cadastros da planilha (Tabela1). Cada cliente possui:
+
+  ------------------- ---------------- ----------------------------------
+  Campo               Tipo             Descrição
+
+  Nome completo       Texto            Nome do cliente (ex: Denys,
+                                       Rafael, Lucas)
+
+  WhatsApp            Telefone         Número para envio de mensagens de
+                                       cobrança
+
+  CPF                 Texto (máscara)  Documento de identificação
+
+  Endereço            Texto            Endereço completo do cliente
+
+  Nome da Mãe         Texto            Dado para identificação adicional
+
+  PIX                 Texto            Chave PIX para recebimento
+
+  Banco               Texto/Select     Banco do cliente
+
+  Agência             Texto            Agência bancária
+
+  Conta               Texto            Número da conta
+
+  Reserva             Número           Valor reservado/garantia do
+                                       cliente
+
+  Linha               Número           Número de linha/referência interna
+
+  Observações         Texto longo      Notas livres sobre o cliente
+  ------------------- ---------------- ----------------------------------
+
+3.2 Módulo: Empréstimos
+
+Equivalente à aba principal (Inicio / Planilha Mestra). Controla cada
+empréstimo por cliente:
+
+  ------------------- ---------------- ----------------------------------
+  Campo               Tipo             Descrição
+
+  Nome do cliente     Select (FK)      Vinculado ao cadastro de clientes
+
+  Data do empréstimo  Data             Data em que o dinheiro foi
+  (DT EMPRÉST.)                        emprestado
+
+  Valor principal     Moeda            Valor bruto emprestado
+
+  Juros (%)           Percentual       Taxa de juros aplicada
+
+  Juros ($)           Moeda (calc.)    Valor dos juros calculado
+                                       automaticamente
+
+  Dívida Total        Moeda (calc.)    Valor + Juros = total a pagar
+
+  Intervalo           Select           DIÁRIO / SEMANAL / QUINZENAL /
+                                       MENSAL
+
+  Nº de Parcelas      Número (1–30)    Quantidade de parcelas do
+                                       empréstimo
+
+  Multa % dia         Percentual       Porcentagem de multa por dia de
+                                       atraso
+
+  Parcelas (1–30)     Data/Valor       Data de vencimento e status de
+                                       cada parcela
+
+  Quitadas            Número (calc.)   Quantidade de parcelas já pagas
+
+  Rec. Amortização    Moeda (calc.)    Total do principal recebido
+
+  Rec. Juros          Moeda (calc.)    Total de juros recebidos
+
+  Atrasado            Booleano/Valor   Indica se há parcelas em atraso
+
+  Dívida Atual        Moeda (calc.)    Saldo devedor atual
+  ------------------- ---------------- ----------------------------------
+
+Regras de Negócio — Empréstimos
+
+-   Parcelas calculadas automaticamente conforme o intervalo
+    (diário/semanal/quinzenal/mensal)
+
+-   Suporte a no mínimo 30 parcelas por empréstimo
+
+-   Juros calculados sobre o valor principal
+
+-   Multa calculada automaticamente em cima dos dias de atraso
+
+-   Dívida atual = parcelas restantes + multas acumuladas
+
+-   Um cliente pode ter múltiplos empréstimos ativos simultaneamente
+
+3.3 Módulo: Lançamentos (Fluxo de Caixa)
+
+Equivalente à aba Lançamentos (Tabela2). Registra todas as movimentações
+financeiras:
+
+  ------------------- ---------------- ----------------------------------
+  Campo               Tipo             Descrição
+
+  Data                Data             Data da movimentação
+
+  Nome Cliente        Select (FK) /    Quem originou a movimentação
+                      Texto            
+
+  Operação            Select           ENTRADA (recebimento) ou SAÍDA
+                                       (empréstimo)
+
+  Valor               Moeda            Valor da movimentação
+
+  Dia                 Número (calc.)   Dia extraído da data
+
+  Mês                 Número (calc.)   Mês extraído da data
+
+  Ano                 Número (calc.)   Ano extraído da data
+  ------------------- ---------------- ----------------------------------
+
+3.4 Módulo: Dashboard / Relatórios
+
+Equivalente às abas Fluxo, Relatórios e painéis com tabelas dinâmicas
+(DASH01/DASH02). Métricas principais:
+
+  ----------------------- -----------------------------------------------
+  Métrica/Painel          Descrição
+
+  Total Emprestado        Soma de todo o capital emprestado ativo
+
+  Total Recebido          Soma de todos os pagamentos recebidos
+
+  Receb. Principal        Capital recebido de volta (amortização)
+
+  Receb. Juros            Juros já recebidos
+
+  Prov. Principal         Principal previsto a receber (em aberto)
+
+  Prov. Juros             Juros previstos a receber (em aberto)
+
+  Prov. Total             Total previsto = Prov. Principal + Prov. Juros
+
+  Total Juros             Soma de todos os juros (recebidos + a receber)
+
+  Total Devido            Dívida total atual de todos os clientes
+
+  Entradas (mês/ano)      Filtro por JAN–DEZ para visualizar entradas
+
+  Saídas (mês/ano)        Filtro por JAN–DEZ para visualizar saídas
+
+  Inadimplentes           Lista de clientes com parcelas em atraso
+
+  Vence Hoje              Empréstimos com parcela vencendo no dia atual
+  ----------------------- -----------------------------------------------
+
+Filtros disponíveis no Dashboard
+
+-   Filtro por cliente
+
+-   Filtro por período (mês e ano)
+
+-   Filtro de atrasados (Filtrar_Atrasados)
+
+-   Filtro de vencendo hoje (Filtrar_Hoje)
+
+-   Filtro avançado (Filtro_Avanc)
+
+-   Botão limpar filtros
+
+3.5 Módulo: Mensagens / Notificações
+
+Equivalente à aba Mensagens da planilha. Permite ao usuário gerar e
+enviar cobranças via WhatsApp:
+
++-----------------------------------------------------------------------+
+| Mensagem padrão identificada na planilha                              |
+|                                                                       |
+| "Olá! Tudo bem? A parcela de seu empréstimo vence HOJE. Estou         |
+| enviando essa mensagem para lembrá-lo do pagamento."                  |
++-----------------------------------------------------------------------+
+
+  ----------------------- -----------------------------------------------
+  Funcionalidade          Detalhe
+
+  Mensagem WhatsApp       Template editável com variáveis do empréstimo
+                          (nome, valor, data)
+
+  Envio direto            Botão para abrir WhatsApp Web/App com mensagem
+                          pré-preenchida
+
+  Contagem de caracteres  Exibe o total de caracteres da mensagem (como
+                          na planilha)
+
+  Vence Hoje?             Flag automática para clientes com parcela
+                          vencendo no dia
+
+  Atrasado?               Flag automática para clientes inadimplentes
+
+  HOJE                    Campo referência para a data atual do sistema
+  ----------------------- -----------------------------------------------
+
+3.6 Módulo: Assinatura e Acesso
+
+Sistema de controle de acesso baseado em assinatura via Asaas, já
+integrado no template:
+
+-   Cadastro/login via Clerk (e-mail e Google OAuth)
+
+-   Plano único: R$ 29,90/mês
+
+-   Acesso ao sistema bloqueado enquanto assinatura inativa ou expirada
+
+-   Webhook Asaas para confirmação automática de pagamento e liberação
+    de acesso
+
+-   Gestão de assinatura pelo usuário (cancelar, reativar)
+
+-   Período de trial opcional (a definir)
+
+  4. Telas e Navegação
+
++-----------------------------------------------------------------------+
+| Nota                                                                  |
+|                                                                       |
+| As rotas seguem a estrutura do template Next.js: (public) para        |
+| páginas abertas e (protected) para páginas que requerem               |
+| autenticação + assinatura ativa.                                      |
++-----------------------------------------------------------------------+
+
+  ------------------ ----------------- ------------------------------------
+  Tela               Rota              Descrição
+
+  Landing Page       /                 Apresentação do produto, preços e
+                                       CTA de cadastro
+
+  Sign Up / Sign In  /sign-up,         Autenticação via Clerk
+                     /sign-in          
+
+  Dashboard          /dashboard        Visão geral: métricas, alertas e
+                                       atalhos
+
+  Empréstimos        /loans            Lista de todos os empréstimos com
+                                       filtros
+
+  Novo Empréstimo    /loans/new        Formulário de criação de empréstimo
+
+  Detalhe do         /loans/[id]       Parcelas, pagamentos e histórico
+  Empréstimo                           
+
+  Clientes           /clients          Lista de clientes cadastrados
+
+  Novo Cliente       /clients/new      Formulário de cadastro de cliente
+
+  Detalhe do Cliente /clients/[id]     Empréstimos, histórico e dados do
+                                       cliente
+
+  Lançamentos        /transactions     Fluxo de caixa: entradas e saídas
+
+  Relatórios         /reports          Gráficos e tabelas de desempenho
+
+  Mensagens          /messages         Geração e envio de mensagens
+                                       WhatsApp
+
+  Vencendo Hoje      /alerts/today     Parcelas com vencimento no dia
+
+  Inadimplentes      /alerts/overdue   Clientes com parcelas atrasadas
+
+  Assinatura         /billing          Gerenciamento do plano Asaas
+
+  Configurações      /settings         Perfil do usuário e preferências
+  ------------------ ----------------- ------------------------------------
+
+  5. Regras de Negócio
+
+5.1 Cálculos Financeiros
+
+  ---------------------- ------------------------------------------------
+  Cálculo                Fórmula / Regra
+
+  Juros ($)              Valor Principal × Juros (%)
+
+  Dívida Total           Valor Principal + Juros ($)
+
+  Valor por Parcela      Dívida Total ÷ Nº Parcelas
+
+  Data das Parcelas      Data empréstimo + (N × intervalo)
+
+  Multa por Atraso       Valor Parcela × (Multa % dia × dias em atraso)
+
+  Dívida Atual           Parcelas não quitadas + Multas acumuladas
+
+  Saldo Credor           Total Recebido − Total Emprestado
+
+  Provisão Total         Prov. Principal + Prov. Juros
+  ---------------------- ------------------------------------------------
+
+5.2 Status de Parcelas
+
+-   PENDENTE — parcela gerada e não vencida
+
+-   VENCE HOJE — vencimento = data atual
+
+-   ATRASADA — vencimento anterior à data atual e não paga
+
+-   PAGA — pagamento registrado
+
+-   QUITADA — empréstimo totalmente quitado
+
+5.3 Tipos de Intervalos
+
+-   DIÁRIO — parcelas a cada 1 dia
+
+-   SEMANAL — parcelas a cada 7 dias
+
+-   QUINZENAL — parcelas a cada 15 dias
+
+-   MENSAL — parcelas a cada 30/31 dias (calendário)
+
+5.4 Controle de Acesso
+
+-   Usuário sem assinatura ativa é redirecionado para /billing
+
+-   Middleware Next.js valida autenticação Clerk em todas as rotas
+    (protected)
+
+-   Webhook Asaas atualiza status da assinatura em tempo real
+
+-   Dados de cada usuário são isolados (não compartilhados entre contas)
+
+  6. APIs e Integrações
+
+6.1 Endpoints Internos
+
+  ------------------------------ ---------------- ----------------------------------------------------
+  Rota                           Método           Descrição
+
+  /api/clients                   GET/POST         Listar e criar clientes
+
+  /api/clients/[id]              GET/PUT/DELETE   Detalhe, edição e exclusão de cliente
+
+  /api/loans                     GET/POST         Listar e criar empréstimos
+
+  /api/loans/[id]                GET/PUT/DELETE   Detalhe, atualização e exclusão de empréstimo
+
+  /api/loans/[id]/installments   GET/PUT          Listar e atualizar parcelas de um empréstimo
+
+  /api/transactions              GET/POST         Listar e criar lançamentos de fluxo de caixa
+
+  /api/reports/dashboard         GET              Métricas consolidadas do dashboard
+
+  /api/reports/overdue           GET              Lista de clientes inadimplentes
+
+  /api/reports/today             GET              Parcelas vencendo hoje
+
+  /api/messages/whatsapp         POST             Gerar link WhatsApp com mensagem
+
+  /api/webhooks/asaas            POST             Webhook do Asaas (pagamentos)
+
+  /api/webhooks/clerk            POST             Webhook do Clerk (sincronização de usuários)
+  ------------------------------ ---------------- ----------------------------------------------------
+
+6.2 Integrações Externas
+
+-   Clerk — Autenticação, cadastro de usuários, SSO
+
+    -   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY / CLERK_SECRET_KEY
+
+    -   Webhook para sincronizar usuários no banco local
+
+-   Asaas — Gateway de pagamento para assinaturas
+
+    -   ASAAS_API_KEY (sandbox para dev, produção para deploy)
+
+    -   Webhook para confirmar pagamentos e ativar acesso
+
+-   WhatsApp — Integração via link deep-link (wa.me)
+
+    -   Abre WhatsApp com mensagem pré-preenchida
+
+    -   Não requer API paga — funciona via URL
+
+  7. Modelo de Dados (Prisma)
+
++-----------------------------------------------------------------------+
+| Nota Técnica                                                          |
+|                                                                       |
+| O banco utiliza PostgreSQL via Prisma ORM, já configurado no          |
+| template. Os modelos abaixo são os necessários para o app de          |
+| empréstimos, além dos modelos de User, Subscription e Credits já      |
+| existentes no template.                                               |
++-----------------------------------------------------------------------+
+
+7.1 Entidades Principais
+
+Client (Cliente)
+
+  ------------------ ------------------ ----------------------------------
+  Campo              Tipo               Notas
+
+  id                 String (UUID)      PK
+
+  userId             String             FK → User (Clerk ID)
+
+  name               String             Nome completo
+
+  whatsapp           String?            Número WhatsApp
+
+  cpf                String?            CPF
+
+  address            String?            Endereço
+
+  motherName         String?            Nome da mãe
+
+  pix                String?            Chave PIX
+
+  bank               String?            Banco
+
+  agency             String?            Agência
+
+  account            String?            Conta
+
+  reserve            Decimal?           Valor de reserva
+
+  line               Int?               Linha/referência interna
+
+  notes              String?            Observações livres
+
+  createdAt          DateTime           Auto
+
+  updatedAt          DateTime           Auto
+  ------------------ ------------------ ----------------------------------
+
+Loan (Empréstimo)
+
+  ------------------- ------------------ ----------------------------------
+  Campo               Tipo               Notas
+
+  id                  String (UUID)      PK
+
+  userId              String             FK → User
+
+  clientId            String             FK → Client
+
+  loanDate            DateTime           Data do empréstimo
+
+  principal           Decimal            Valor emprestado
+
+  interestRate        Decimal            Juros (%)
+
+  installmentsCount   Int                Nº de parcelas (1–30)
+
+  interval            Enum               DAILY | WEEKLY | BIWEEKLY |
+                                         MONTHLY
+
+  penaltyPerDay       Decimal            Multa % por dia de atraso
+
+  status              Enum               ACTIVE | PAID_OFF | CANCELLED
+
+  createdAt           DateTime           Auto
+
+  updatedAt           DateTime           Auto
+  ------------------- ------------------ ----------------------------------
+
+Installment (Parcela)
+
+  ------------------ ------------------ ----------------------------------
+  Campo              Tipo               Notas
+
+  id                 String (UUID)      PK
+
+  loanId             String             FK → Loan
+
+  number             Int                Número da parcela (1–30)
+
+  dueDate            DateTime           Data de vencimento
+
+  amount             Decimal            Valor da parcela
+
+  paidAt             DateTime?          Data em que foi paga
+
+  paidAmount         Decimal?           Valor pago
+
+  penalty            Decimal            Multa acumulada
+
+  status             Enum               PENDING | PAID | OVERDUE | TODAY
+  ------------------ ------------------ ----------------------------------
+
+Transaction (Lançamento)
+
+  ------------------ ------------------ ----------------------------------
+  Campo              Tipo               Notas
+
+  id                 String (UUID)      PK
+
+  userId             String             FK → User
+
+  clientId           String?            FK → Client (opcional)
+
+  loanId             String?            FK → Loan (opcional)
+
+  type               Enum               ENTRADA | SAIDA
+
+  amount             Decimal            Valor
+
+  date               DateTime           Data da movimentação
+
+  notes              String?            Observação
+  ------------------ ------------------ ----------------------------------
+
+  8. Escopo MVP e Roadmap
+
+8.1 MVP — Fase 1 (Lançamento)
+
++-----------------------------------------------------------------------+
+| Critério de sucesso do MVP                                            |
+|                                                                       |
+| Usuário consegue substituir completamente a planilha pelo app para o  |
+| fluxo principal: cadastrar cliente → criar empréstimo → registrar     |
+| pagamentos → visualizar o que está em atraso.                         |
++-----------------------------------------------------------------------+
+
+  ---------------------------------------------- ------------ ------------
+  Funcionalidade                                 Prioridade   Fase
+
+  Autenticação Clerk (login, cadastro, logout)   CRÍTICO      MVP
+
+  Assinatura via Asaas (R$ 29,90/mês)            CRÍTICO      MVP
+
+  Cadastro e listagem de clientes (CRUD          CRÍTICO      MVP
+  completo)                                                   
+
+  Criação de empréstimos com até 30 parcelas     CRÍTICO      MVP
+
+  Geração automática de parcelas por intervalo   CRÍTICO      MVP
+
+  Registro de pagamentos de parcelas             CRÍTICO      MVP
+
+  Cálculo automático de multa por atraso         CRÍTICO      MVP
+
+  Dashboard com métricas principais              ALTO         MVP
+
+  Alerta de vencimentos do dia                   ALTO         MVP
+
+  Alerta de inadimplentes                        ALTO         MVP
+
+  Lançamentos de fluxo de caixa (ENTRADA/SAÍDA)  ALTO         MVP
+
+  Link WhatsApp com mensagem de cobrança         ALTO         MVP
+
+  Filtro por cliente e por status no dashboard   MÉDIO        MVP
+
+  Listagem de todos os empréstimos ativos        MÉDIO        MVP
+  ---------------------------------------------- ------------ ------------
+
+8.2 Fase 2 — Pós-MVP
+
+-   Exportação de relatórios em PDF/Excel
+
+-   Gráficos de evolução por mês (JAN–DEZ)
+
+-   Envio automático de mensagem WhatsApp via API (não só o link)
+
+-   Multi-usuário: times com acesso compartilhado
+
+-   Histórico de alterações por empréstimo (audit log)
+
+-   Backup e importação de dados via CSV
+
+-   App mobile (PWA ou React Native)
+
+-   Integração com Open Banking para validar dados bancários
+
+-   Análise de crédito / score interno por cliente
+
+8.3 Estimativa de Esforço (MVP)
+
+  --------------------------- --------------------------- ----------------
+  Módulo                      Complexidade                Estimativa
+
+  Setup base (já parcialmente Baixa                       0.5 dia
+  pronto no template)                                     
+
+  Banco de dados (schema +    Média                       1 dia
+  migrations)                                             
+
+  CRUD de Clientes            Baixa                       1 dia
+
+  CRUD de Empréstimos +       Alta                        3 dias
+  parcelas automáticas                                    
+
+  Registro de pagamentos +    Alta                        2 dias
+  cálculo de multa                                        
+
+  Dashboard + métricas        Média                       2 dias
+
+  Alertas (vence hoje /       Média                       1 dia
+  inadimplentes)                                          
+
+  Lançamentos (fluxo de       Baixa                       1 dia
+  caixa)                                                  
+
+  Mensagens WhatsApp (link)   Baixa                       0.5 dia
+
+  Integração Asaas            Média                       1 dia
+  (assinatura)                                            
+
+  Testes e ajustes finais     Média                       2 dias
+  --------------------------- --------------------------- ----------------
+
+  9. Requisitos Não-Funcionais
+
+  ------------------ ----------------------------------------------------
+  Categoria          Requisito
+
+  Segurança          Dados isolados por userId (multi-tenant); senhas
+                     gerenciadas pelo Clerk; HTTPS obrigatório; variáveis
+                     sensíveis em .env
+
+  Performance        Dashboard carrega em menos de 2s; listagens
+                     paginadas (máx. 50 itens/página)
+
+  Disponibilidade    Uptime mínimo de 99% (Vercel/Replit); banco
+                     PostgreSQL gerenciado (Neon/Supabase)
+
+  Escalabilidade     Arquitetura stateless (Next.js); banco relacional
+                     suporta crescimento; Prisma facilita migrations
+
+  Acessibilidade     Interface responsiva (mobile-first); componentes
+                     Radix UI com suporte a ARIA
+
+  Usabilidade        Fluxo principal em no máximo 3 cliques; sem jargão
+                     técnico; mensagens de erro claras
+
+  Conformidade       LGPD: dados pessoais de clientes tratados com
+                     consentimento; possibilidade de exclusão de conta
+  ------------------ ----------------------------------------------------
+
+  10. Configuração e Variáveis de Ambiente
+
+  ----------------------------------- --------------- -------------------------------
+  Variável                            Obrigatória     Uso
+
+  DATABASE_URL                        SIM             Conexão PostgreSQL (Prisma)
+
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY   SIM             Chave pública Clerk (frontend)
+
+  CLERK_SECRET_KEY                    SIM             Chave secreta Clerk (backend)
+
+  CLERK_WEBHOOK_SECRET                SIM             Validação de webhooks Clerk
+
+  ASAAS_API_KEY                       SIM             API key do Asaas para cobrança
+
+  ASAAS_WEBHOOK_SECRET                SIM             Validação de webhooks Asaas
+
+  NEXT_PUBLIC_APP_URL                 SIM             URL pública do app (callback
+                                                      Asaas)
+
+  ADMIN_EMAILS                        Recomendado     E-mails com acesso ao painel
+                                                      admin
+  ----------------------------------- --------------- -------------------------------
+
+  11. Critérios de Aceite
+
+11.1 Empréstimos
+
+-   Ao criar um empréstimo com N parcelas e intervalo X, o sistema gera
+    exatamente N parcelas com datas corretas
+
+-   O valor de cada parcela = Dívida Total ÷ N parcelas
+
+-   Ao marcar uma parcela como paga, o status da parcela muda e a dívida
+    atual é recalculada
+
+-   Multa é calculada corretamente como: valor_parcela × (multa_%_dia ×
+    dias_de_atraso)
+
+-   Um empréstimo com todas as parcelas pagas muda seu status para
+    PAID_OFF
+
+11.2 Dashboard
+
+-   Total Emprestado exibe a soma de todos os empréstimos ativos do
+    usuário
+
+-   A lista 'Vence Hoje' mostra somente parcelas com dueDate = data
+    atual
+
+-   A lista 'Inadimplentes' mostra somente parcelas com dueDate < data
+    atual e status PENDENTE
+
+-   Filtros de mês/ano filtram corretamente entradas e saídas do fluxo
+    de caixa
+
+11.3 Autenticação e Assinatura
+
+-   Usuário sem login é redirecionado para /sign-in
+
+-   Usuário com login mas sem assinatura é redirecionado para /billing
+
+-   Após pagamento confirmado pelo Asaas, o usuário tem acesso imediato
+
+-   Dados de um usuário não são acessíveis a outros usuários
+
+11.4 WhatsApp
+
+-   Ao clicar 'Enviar cobrança', abre o WhatsApp com o número e mensagem
+    corretos pré-preenchidos
+
+-   A mensagem inclui o nome do cliente, valor da parcela e data de
+    vencimento
+
+-   A contagem de caracteres é exibida e atualiza em tempo real
+
+  12. Glossário
+
+  --------------------- -------------------------------------------------
+  Termo                 Definição
+
+  Credor                Usuário do sistema — quem empresta o dinheiro
+
+  Devedor / Cliente     Pessoa que recebeu o empréstimo
+
+  Parcela               Cada pagamento periódico do empréstimo
+
+  Amortização (Rec.     Pagamento do principal (não inclui juros)
+  Amort.)               
+
+  Provisão (Prov.)      Valor esperado a receber no futuro
+
+  Dívida Atual          Saldo devedor em tempo real (inclui multas)
+
+  Intervalo             Frequência das parcelas:
+                        diário/semanal/quinzenal/mensal
+
+  Multa % dia           Porcentagem de penalidade aplicada por cada dia
+                        de atraso
+
+  Reserva               Garantia em valor registrada no cadastro do
+                        cliente
+
+  Clerk                 Plataforma de autenticação utilizada no template
+
+  Asaas                 Gateway de pagamento brasileiro integrado ao
+                        template
+  --------------------- -------------------------------------------------
+
+LoanManager PRD v1.0 • Documento gerado automaticamente com base na
+planilha Controle_de_Emprést (4X) 30P
+
+Template: Codeia-Kit (Next.js + Clerk + Asaas + Prisma + PostgreSQL)

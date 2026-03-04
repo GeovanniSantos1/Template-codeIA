@@ -182,3 +182,119 @@ model SubscriptionEvent {
   @@index([clerkUserId, occurredAt])
   @@index([userId, occurredAt])
 }
+
+enum LoanInterval {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum LoanStatus {
+  ACTIVE
+  PAID_OFF
+  CANCELLED
+}
+
+enum InstallmentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum TransactionType {
+  ENTRADA
+  SAIDA
+}
+
+model Client {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  whatsapp   String?
+  cpf        String?
+  address    String?
+  motherName String?
+  pix        String?
+  bank       String?
+  agency     String?
+  account    String?
+  reserve    Decimal? @db.Decimal(12, 2)
+  line       Int?
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  loans        Loan[]
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([name])
+  @@index([cpf])
+}
+
+model Loan {
+  id                String       @id @default(cuid())
+  userId            String
+  clientId          String
+  loanDate          DateTime
+  principal         Decimal      @db.Decimal(12, 2)
+  interestRate      Decimal      @db.Decimal(5, 2)
+  installmentsCount Int
+  interval          LoanInterval
+  penaltyPerDay     Decimal      @default(0) @db.Decimal(5, 2)
+  status            LoanStatus   @default(ACTIVE)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  installments Installment[]
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@index([userId, status])
+}
+
+model Installment {
+  id         String            @id @default(cuid())
+  loanId     String
+  number     Int
+  dueDate    DateTime
+  amount     Decimal           @db.Decimal(12, 2)
+  paidAt     DateTime?
+  paidAmount Decimal?          @db.Decimal(12, 2)
+  penalty    Decimal           @default(0) @db.Decimal(12, 2)
+  status     InstallmentStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+  @@index([dueDate])
+  @@index([status])
+  @@index([loanId, status])
+}
+
+model Transaction {
+  id       String          @id @default(cuid())
+  userId   String
+  clientId String?
+  loanId   String?
+  type     TransactionType
+  amount   Decimal         @db.Decimal(12, 2)
+  date     DateTime
+  notes    String?         @db.Text
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  loan   Loan?   @relation(fields: [loanId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([type])
+  @@index([clientId])
+}

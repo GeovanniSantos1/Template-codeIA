@@ -18,13 +18,13 @@ export type AnalyticsConfig = {
 }
 
 export const site = {
-  name: 'AI Coders Academy – Next.js SaaS Template',
-  shortName: 'AI Coders SaaS',
+  name: 'LoanManager — Gestão de Empréstimos',
+  shortName: 'LoanManager',
   description:
-    'Template Next.js pronto para produção pela AI Coders Academy: autenticação, banco de dados, pagamentos e sistema de créditos incluídos.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  author: 'AI Coders Academy (Vinicius Lana)',
-  keywords: ['SaaS', 'Next.js', 'TypeScript', 'Clerk', 'Prisma', 'Tailwind CSS', 'AI Coders Academy', 'Template', 'Microsaas'],
+    'Gerencie seus empréstimos pessoais de forma simples e segura. Controle clientes, parcelas, juros, multas e fluxo de caixa em um único lugar.',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000',
+  author: 'LoanManager',
+  keywords: ['empréstimos', 'gestão financeira', 'controle de parcelas', 'fluxo de caixa', 'cobrança', 'SaaS'],
   ogImage: '/og-image.png',
   logo: {
     light: '/logo-light.svg',

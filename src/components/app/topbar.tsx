@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { CreditStatus } from "@/components/credits/credit-status";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { navigationItems } from "@/components/app/sidebar";
 
@@ -42,7 +41,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
             <SheetContent side="left" className="w-72 p-0 md:hidden">
               <SheetHeader className="p-4 text-left">
                 <div className="flex items-center justify-between">
-                  <SheetTitle>SaaS Template</SheetTitle>
+                  <SheetTitle>LoanManager</SheetTitle>
                 </div>
               </SheetHeader>
               <nav className="flex flex-col gap-1 p-2">
@@ -67,7 +66,6 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
                     <SignedIn>
                       <div className="flex items-center gap-3">
                         <UserButton afterSignOutUrl="/" />
-                        <CreditStatus />
                       </div>
                     </SignedIn>
                     <SignedOut>
@@ -90,8 +88,8 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
         {/* Brand (mobile) */}
         <Link href="/" className="flex items-center gap-2 md:hidden">
-          <div className="h-6 w-6 rounded bg-primary" />
-          <span className="text-sm font-semibold">SaaS Template</span>
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold">$</div>
+          <span className="text-sm font-semibold">LoanManager</span>
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -111,7 +109,6 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
         {/* Right side actions */}
         <div className="flex items-center gap-2">
           <SignedIn>
-            <CreditStatus />
             <Separator orientation="vertical" className="h-6" />
           </SignedIn>
           
